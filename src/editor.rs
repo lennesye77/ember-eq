@@ -14,7 +14,7 @@ const RUST: egui::Color32 = egui::Color32::from_rgb(184, 93, 55);
 const MOSS: egui::Color32 = egui::Color32::from_rgb(95, 111, 80);
 const AMBER: egui::Color32 = egui::Color32::from_rgb(217, 145, 58);
 const GRAPH_BG: egui::Color32 = egui::Color32::from_rgb(48, 42, 35);
-const GRAPH_GRID: egui::Color32 = egui::Color32::from_rgba_unmultiplied(255, 244, 224, 30);
+const GRAPH_GRID: egui::Color32 = egui::Color32::from_rgb(78, 69, 59);
 const GRAPH_TEXT: egui::Color32 = egui::Color32::from_rgb(194, 180, 160);
 const RESPONSE_LIMIT_DB: f32 = 18.0;
 const DISPLAY_SAMPLE_RATE: f32 = 48_000.0;
@@ -82,8 +82,8 @@ fn draw_header(ui: &mut egui::Ui, params: &EmberParams, setter: &ParamSetter) {
         });
 
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            ui.add(widgets::ParamButton::new(&params.bypass, setter));
-            ui.label(egui::RichText::new("Bypass").strong().color(INK));
+            draw_bool_button(ui, &params.bypass, setter, "BYPASSED", "ACTIVE");
+            ui.label(egui::RichText::new("Plugin").strong().color(INK));
         });
     });
 }
@@ -206,9 +206,12 @@ fn draw_graph_grid(painter: &egui::Painter, rect: egui::Rect) {
     for db in [-18.0_f32, -12.0, -6.0, 0.0, 6.0, 12.0, 18.0] {
         let y = gain_to_y(rect, db);
         let stroke = if db == 0.0 {
-            egui::Stroke::new(1.5, egui::Color32::from_rgba_unmultiplied(255, 244, 224, 75))
+            egui::Stroke::new(
+                1.5_f32,
+                egui::Color32::from_rgba_unmultiplied(255, 244, 224, 75),
+            )
         } else {
-            egui::Stroke::new(1.0, GRAPH_GRID)
+            egui::Stroke::new(1.0_f32, GRAPH_GRID)
         };
         painter.line_segment(
             [egui::pos2(rect.left(), y), egui::pos2(rect.right(), y)],
@@ -234,7 +237,7 @@ fn draw_graph_grid(painter: &egui::Painter, rect: egui::Rect) {
         let x = frequency_to_x(rect, frequency);
         painter.line_segment(
             [egui::pos2(x, rect.top()), egui::pos2(x, rect.bottom())],
-            egui::Stroke::new(1.0, GRAPH_GRID),
+            egui::Stroke::new(1.0_f32, GRAPH_GRID),
         );
 
         painter.text(
@@ -276,7 +279,10 @@ fn draw_response_curve(painter: &egui::Painter, rect: egui::Rect, params: &Ember
         points.push(egui::pos2(x, y));
     }
 
-    painter.add(egui::Shape::line(points, egui::Stroke::new(2.5, AMBER)));
+    painter.add(egui::Shape::line(
+        points,
+        egui::Stroke::new(2.5_f32, AMBER),
+    ));
 }
 
 fn draw_band_grid(ui: &mut egui::Ui, params: &EmberParams, setter: &ParamSetter) {
@@ -314,7 +320,7 @@ fn draw_band_card(
                         .color(accent),
                 );
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.add(widgets::ParamButton::new(&band.enabled, setter));
+                    draw_bool_button(ui, &band.enabled, setter, "ON", "OFF");
                 });
             });
 
@@ -381,6 +387,22 @@ fn draw_footer(ui: &mut egui::Ui, params: &EmberParams, setter: &ParamSetter) {
             );
         });
     });
+}
+
+fn draw_bool_button(
+    ui: &mut egui::Ui,
+    param: &BoolParam,
+    setter: &ParamSetter,
+    true_text: &str,
+    false_text: &str,
+) {
+    let value = param.value();
+    let label = if value { true_text } else { false_text };
+    if ui.selectable_label(value, label).clicked() {
+        setter.begin_set_parameter(param);
+        setter.set_parameter(param, !value);
+        setter.end_set_parameter(param);
+    }
 }
 
 fn band_position(rect: egui::Rect, band: &BandParams) -> egui::Pos2 {
