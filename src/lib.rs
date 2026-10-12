@@ -1,4 +1,5 @@
 use nih_plug::prelude::*;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 
 mod dsp;
@@ -11,6 +12,7 @@ pub struct EmberEq {
     sample_rate: f32,
     left: [Biquad; 6],
     right: [Biquad; 6],
+    display_sample_rate: Arc<AtomicU32>,
 }
 
 #[derive(Params)]
@@ -76,7 +78,7 @@ impl Default for EmberParams {
                 },
             )
             .with_unit(" dB")
-            .with_smoother(SmoothingStyle::Logarithmic(20.0)),
+            .with_smoother(SmoothingStyle::Linear(20.0)),
             bands: std::array::from_fn(|i| {
                 let default_kind = match i {
                     0 => FilterKind::LowCut,
@@ -130,6 +132,7 @@ impl Default for EmberEq {
             sample_rate: 44_100.0,
             left: std::array::from_fn(|_| Biquad::default()),
             right: std::array::from_fn(|_| Biquad::default()),
+            display_sample_rate: Arc::new(AtomicU32::new(44_100.0_f32.to_bits())),
         }
     }
 }
@@ -191,7 +194,7 @@ impl Plugin for EmberEq {
     }
 
     fn editor(&mut self, _async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
-        editor::create(self.params.clone())
+        editor::create(self.params.clone(), self.display_sample_rate.clone())
     }
 
     fn initialize(
@@ -201,6 +204,8 @@ impl Plugin for EmberEq {
         _context: &mut impl InitContext<Self>,
     ) -> bool {
         self.sample_rate = buffer_config.sample_rate;
+        self.display_sample_rate
+            .store(self.sample_rate.to_bits(), Ordering::Relaxed);
         for filter in self.left.iter_mut().chain(self.right.iter_mut()) {
             filter.reset();
         }

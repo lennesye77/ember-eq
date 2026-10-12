@@ -26,9 +26,25 @@ cargo xtask bundle ember_eq --release
 
 The bundled plugin will be written under `target/bundled/`.
 
-## Status
+## Editor controls
 
-Ember EQ is early in development. The EQ DSP is functional; the live response curve, draggable EQ nodes and spectrum analyser are planned next.
+- Drag graph nodes to set frequency and gain. Cut filters move horizontally.
+- Hold the left mouse button on a node or frequency/gain slider and turn the mouse wheel to change that band's Q. Wheel up narrows the band; wheel down broadens it.
+- All six band cards use bounded columns, with scrolling when vertical space is limited.
+- **Reset band** restores its default frequency, type, gain and Q, preserving its enabled state.
+- **Flat EQ** disables all six bands and resets output to 0 dB. Enable individual bands to build a new curve.
+- **A → B / B → A** switches between two editable settings. The first switch copies A into B. Comparison includes band settings and output gain, and lasts while the editor is open; the host saves the currently active settings.
+- The response curve uses the host sample rate and includes output gain and master bypass.
+
+## Possible next features
+
+- Input/output spectrum analyser to spot resonances and see the effect of each adjustment.
+- Band audition to help locate problem frequencies by ear.
+- Output peak meters with a clip indicator for managing headroom.
+- Named presets and preset import/export for reusing settings across sessions.
+- Selectable cut slopes for more control over low/high frequency cleanup.
+
+These are future ideas, not implemented features.
 
 ## License
 
