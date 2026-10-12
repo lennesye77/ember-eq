@@ -1,0 +1,20 @@
+name: Build Windows VST3
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Bundle Ember EQ
+        run: cargo xtask bundle ember_eq --release
+      - name: Upload plugin bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ember-EQ-Windows
+          path: target/bundled/
