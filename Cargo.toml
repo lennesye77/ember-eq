@@ -1,0 +1,18 @@
+[package]
+name = "ember_eq"
+version = "0.1.0"
+edition = "2021"
+authors = ["Cove Labs"]
+description = "Ember EQ — a warm, cozy parametric EQ from Cove Labs."
+license = "GPL-3.0-or-later"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+
+[workspace]
+members = ["xtask"]
