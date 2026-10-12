@@ -3,6 +3,7 @@ name: Build Windows VST3
 on:
   workflow_dispatch:
   push:
+    branches: ["main"]
     tags: ["v*"]
 
 jobs:
@@ -11,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Test
+        run: cargo test --all
       - name: Bundle Ember EQ
         run: cargo xtask bundle ember_eq --release
       - name: Upload plugin bundle
